@@ -73,6 +73,7 @@ export class AngularMultiSelect implements OnInit, ControlValueAccessor, OnChang
         disabled: false,
         searchPlaceholderText: 'Search',
         showCheckbox: true,
+        loadingText: 'Loading...',
         isRemoteFilter: false
     }
     constructor() {
