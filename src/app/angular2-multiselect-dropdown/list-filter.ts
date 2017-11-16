@@ -7,8 +7,8 @@ import { ListItem } from './multiselect.model';
     pure: false
 })
 export class ListFilterPipe implements PipeTransform {
-    transform(items: ListItem[], filter: ListItem): ListItem[] {
-        if (!items || !filter) {
+    transform(items: ListItem[], filter: ListItem, isRemoteFilter: boolean): ListItem[] {
+        if (!items || !filter || isRemoteFilter) {
             return items;
         }
         return items.filter((item: ListItem) => this.applyFilter(item, filter));

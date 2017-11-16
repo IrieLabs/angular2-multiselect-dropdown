@@ -13,4 +13,6 @@ export interface DropdownSettings{
     searchPlaceholderText: String;
     groupBy?: String;
     showCheckbox?: Boolean;
-} 
+    loadingText?: Boolean;
+    isRemoteFilter?: Boolean;
+}

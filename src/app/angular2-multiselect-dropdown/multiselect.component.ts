@@ -31,6 +31,12 @@ export class AngularMultiSelect implements OnInit, ControlValueAccessor, OnChang
     @Input()
     settings: DropdownSettings;
 
+    @Input()
+    isLoading: boolean;
+
+    @Input()
+    alertText: string
+
     @Output('onSelect')
     onSelect: EventEmitter<ListItem> = new EventEmitter<ListItem>();
 
@@ -42,6 +48,9 @@ export class AngularMultiSelect implements OnInit, ControlValueAccessor, OnChang
 
     @Output('onDeSelectAll')
     onDeSelectAll: EventEmitter<Array<ListItem>> = new EventEmitter<Array<ListItem>>();
+
+    @Output('onTyped')
+    onTyped: EventEmitter<string> = new EventEmitter<string>();
 
     @ContentChild(Item) itemTempl: Item;
 
@@ -63,7 +72,8 @@ export class AngularMultiSelect implements OnInit, ControlValueAccessor, OnChang
         classes: '',
         disabled: false,
         searchPlaceholderText: 'Search',
-        showCheckbox: true
+        showCheckbox: true,
+        isRemoteFilter: false
     }
     constructor() {
 
@@ -75,13 +85,20 @@ export class AngularMultiSelect implements OnInit, ControlValueAccessor, OnChang
         }
     }
     ngOnChanges(changes: SimpleChanges){
-        if(!changes.data.firstChange){
+        if(changes.settings) {
+            this.settings = Object.assign(this.defaultSettings, this.settings);
             if (this.settings.groupBy) {
-            this.groupedData = this.transformData(this.data, this.settings.groupBy);
-            if(this.data.length == 0){
-                this.selectedItems = [];
+                this.groupedData = this.transformData(this.data, this.settings.groupBy);
             }
         }
+
+        if(changes.data){
+            if (this.settings.groupBy) {
+                this.groupedData = this.transformData(this.data, this.settings.groupBy);
+                if(this.data.length == 0){
+                    this.selectedItems = [];
+                }
+            }
         }
     }
     ngDoCheck() {
@@ -123,6 +140,11 @@ export class AngularMultiSelect implements OnInit, ControlValueAccessor, OnChang
             this.isSelectAll = true;
         }
     }
+
+    onFilterInput(term: string) {
+      this.onTyped.emit(term);
+    }
+
     private onTouchedCallback: () => void = noop;
     private onChangeCallback: (_: any) => void = noop;
 
