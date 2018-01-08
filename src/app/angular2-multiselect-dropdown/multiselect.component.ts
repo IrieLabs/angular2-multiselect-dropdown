@@ -1,4 +1,4 @@
-import { Component, OnInit, NgModule, SimpleChanges, OnChanges, ViewEncapsulation, ContentChild, forwardRef, Input, Output, EventEmitter, ElementRef, AfterViewInit, Pipe, PipeTransform } from '@angular/core';
+import { Component, OnInit, NgModule, SimpleChanges, OnChanges, ViewEncapsulation, ContentChild, ViewChild, forwardRef, Input, Output, EventEmitter, ElementRef, AfterViewInit, Pipe, PipeTransform } from '@angular/core';
 import { FormsModule, NG_VALUE_ACCESSOR, ControlValueAccessor } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 import { ListItem, MyException } from './multiselect.model';
@@ -49,11 +49,18 @@ export class AngularMultiSelect implements OnInit, ControlValueAccessor, OnChang
     @Output('onDeSelectAll')
     onDeSelectAll: EventEmitter<Array<ListItem>> = new EventEmitter<Array<ListItem>>();
 
-    @Output('onTyped')
-    onTyped: EventEmitter<string> = new EventEmitter<string>();
+    @Output('onOpen')
+    onOpen: EventEmitter<any> = new EventEmitter<any>();
+
+    @Output('onClose')
+    onClose: EventEmitter<any> = new EventEmitter<any>();
+
+    @Output('onFilterKey')
+    onFilterKey: EventEmitter<string> = new EventEmitter<string>();
 
     @ContentChild(Item) itemTempl: Item;
 
+    @ViewChild('searchInput') searchInput: ElementRef;
 
     public selectedItems: Array<ListItem>;
     public isActive: boolean = false;
@@ -73,6 +80,7 @@ export class AngularMultiSelect implements OnInit, ControlValueAccessor, OnChang
         disabled: false,
         searchPlaceholderText: 'Search',
         showCheckbox: true,
+        searchAutofocus: true,
         loadingText: 'Loading...',
         isRemoteFilter: false
     }
@@ -143,7 +151,7 @@ export class AngularMultiSelect implements OnInit, ControlValueAccessor, OnChang
     }
 
     onFilterInput(term: string) {
-      this.onTyped.emit(term);
+      this.onFilterKey.emit(term);
     }
 
     private onTouchedCallback: () => void = noop;
@@ -226,11 +234,23 @@ export class AngularMultiSelect implements OnInit, ControlValueAccessor, OnChang
             return false;
         }
         this.isActive = !this.isActive;
+        if (this.isActive) {
+            if (this.settings.searchAutofocus && this.settings.enableSearchFilter) {
+                setTimeout(() => {
+                    this.searchInput.nativeElement.focus();
+                }, 0);
+            }
+            this.onOpen.emit(true);
+        }
+        else {
+            this.onClose.emit(false);
+        }
         evt.preventDefault();
     }
     closeDropdown() {
         this.filter = new ListItem();
         this.isActive = false;
+        this.onClose.emit(false);
     }
     toggleSelectAll() {
         if (!this.isSelectAll) {
